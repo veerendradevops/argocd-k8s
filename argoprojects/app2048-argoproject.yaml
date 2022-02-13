@@ -1,0 +1,45 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: app2048
+  namespace: app2048
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: app2048 Application Project
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  sourceRepos:
+  - https://github.com/veerendradevops/argocd-k8s.git
+  destinations:
+  - namespace: kube-system
+    server: https://kubernetes.default.svc
+  - namespace: app2048
+    server: https://kubernetes.default.svc
+  - namespace: argocd
+    server: https://kubernetes.default.svc
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app2048
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: app2048
+  source:
+    repoURL: https://github.com/veerendradevops/argocd-k8s.git
+    targetRevision: default
+    path: app2048
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: app2048
+  syncPolicy:
+    automated:
+      selfHeal: true
+      allowEmpty: true
+      prune: true
+
